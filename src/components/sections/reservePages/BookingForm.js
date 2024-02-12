@@ -1,126 +1,153 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
+
 export default function ReservationForm(props) {
-  const [fName, setFName] = useState("");
-  const [lName, setLName] = useState("");
-  const [email, setEmail] = useState("");
-  const [tel, setTel] = useState("");
-  const [people, setPeople] = useState(1);
-  const [date, setDate] = useState("");
-  const [occasion, setOccasion] = useState("");
-  const [preferences, setPreferences] = useState("");
-  const [comments, setComments] = useState("");
+  const [formData, setFormData] = useState({
+    fName: "",
+    lName: "",
+    email: "",
+    tel: "",
+    people: 1,
+    date: "",
+    occasion: "",
+    preferences: "",
+    comments: "",
+  });
 
   const [finalTime, setFinalTime] = useState(
     props.availableTimes.map(times => <option>{times}</option>)
   );
 
-  function handleDateChange(e) {
-    setDate(e.target.value);
+  const handleChange = ({ target }) => {
+    const { name, value } = target;
+    setFormData(prevState => ({ ...prevState, [name]: value }));
+  };
 
-    var stringify = e.target.value;
-    const date = new Date(stringify);
-
-    props.updateTimes(date);
-
+  const handleDateChange = ({ target }) => {
+    const { value } = target;
+    setFormData(prevState => ({ ...prevState, date: value }));
+    props.updateTimes(new Date(value));
     setFinalTime(props.availableTimes.map(times => <option>{times}</option>));
-  }
+  };
+
+  const requiredFields = ["fName", "lName", "email", "tel", "date"]; // Define required fields here
+
+  const handleSubmit = e => {
+    e.preventDefault();
+    // Check if all required fields are filled out
+    const isFormValid = requiredFields.every(
+      field => formData[field].trim() !== ""
+    );
+
+    if (!isFormValid) {
+      alert("Please fill out all required fields");
+      return;
+    }
+  };
 
   return (
-    <form className="reservation-form">
+    <form className="reservation-form" onSubmit={handleSubmit}>
       <div>
         <label htmlFor="fName">First Name</label> <br></br>
         <input
           type="text"
           id="fName"
+          name="fName"
           placeholder="First Name"
           required
           minLength={2}
           maxLength={50}
-          value={fName}
-          onChange={e => setFName(e.target.value)}
+          value={formData.fName}
+          onChange={handleChange}
         ></input>
       </div>
 
       <div>
-        <label htmlFor="lName">Last Name</label> <br></br>
+        <label htmlFor="lName">Last Name</label> <br />
         <input
           type="text"
           id="lName"
+          name="lName"
           placeholder="Last Name"
+          required
           minLength={2}
           maxLength={50}
-          value={lName}
-          onChange={e => setLName(e.target.value)}
-        ></input>
+          value={formData.lName}
+          onChange={handleChange}
+        />
       </div>
 
       <div>
-        <label htmlFor="email">Email</label> <br></br>
+        <label htmlFor="email">Email</label> <br />
         <input
           type="email"
           id="email"
+          name="email"
           placeholder="Email"
-          value={email}
           required
+          value={formData.email}
           minLength={4}
           maxLength={200}
-          onChange={e => setEmail(e.target.value)}
-        ></input>
+          onChange={handleChange}
+        />
       </div>
 
       <div>
-        <label htmlFor="phonenum">Phone Number</label> <br></br>
+        <label htmlFor="phonenum">Phone Number</label> <br />
         <input
           type="tel"
           id="phonenum"
+          name="tel"
           placeholder="(xxx)-xxx-xxxx"
-          value={tel}
           required
+          value={formData.tel}
           minLength={10}
           maxLength={25}
-          onChange={e => setTel(e.target.value)}
-        ></input>
+          onChange={handleChange}
+        />
       </div>
 
       <div>
-        <label htmlFor="people">Number of People</label> <br></br>
+        <label htmlFor="people">Number of People</label> <br />
         <input
           type="number"
           id="people"
+          name="people"
           placeholder="Number of People"
-          value={people}
+          value={formData.people}
           required
           min={1}
           max={100}
-          onChange={e => setPeople(e.target.value)}
-        ></input>
+          onChange={handleChange}
+        />
       </div>
 
       <div>
-        <label htmlFor="date">Select Date</label> <br></br>
+        <label htmlFor="date">Select Date</label> <br />
         <input
           type="date"
           id="date"
+          name="date"
           required
-          value={date}
+          value={formData.date}
           onChange={handleDateChange}
-        ></input>
+        />
       </div>
 
       <div>
-        <label htmlFor="time">Select Time</label> <br></br>
-        <select id="time" required>
+        <label htmlFor="time">Select Time</label> <br />
+        <select id="time" name="time" required>
           {finalTime}
         </select>
       </div>
 
       <div>
-        <label htmlFor="occasion">Occasion</label> <br></br>
+        <label htmlFor="occasion">Occasion</label> <br />
         <select
           id="occasion"
-          value={occasion}
-          onChange={e => setOccasion(e.target.value)}
+          name="occasion"
+          value={formData.occasion}
+          onChange={handleChange}
         >
           <option>None</option>
           <option>Birthday</option>
@@ -131,11 +158,12 @@ export default function ReservationForm(props) {
       </div>
 
       <div>
-        <label htmlFor="preferences">Seating preferences</label> <br></br>
+        <label htmlFor="preferences">Seating preferences</label> <br />
         <select
           id="preferences"
-          value={preferences}
-          onChange={e => setPreferences(e.target.value)}
+          name="preferences"
+          value={formData.preferences}
+          onChange={handleChange}
         >
           <option>None</option>
           <option>Indoors</option>
@@ -145,28 +173,31 @@ export default function ReservationForm(props) {
       </div>
 
       <div>
-        <label htmlFor="comments">Additional Comments</label> <br></br>
+        <label htmlFor="comments">Additional Comments</label> <br />
         <textarea
           id="comments"
+          name="comments"
           rows={8}
           cols={50}
           placeholder="Additional Comments"
-          value={comments}
-          onChange={e => setComments(e.target.value)}
-        ></textarea>
+          value={formData.comments}
+          onChange={handleChange}
+        />
       </div>
 
       <div>
-        <br></br>
+        <br />
         <small>
           <p>
             Note: You cannot edit your reservation after submission. Please
             double-check your answer before submitting your reservation request.
           </p>
         </small>
-        <Link className="action-button" to="/confirmation">
-          Book Table
-        </Link>
+        {requiredFields.every(field => formData[field].trim() !== "") && (
+          <Link className="action-button" to="/confirmation">
+            Book Table
+          </Link>
+        )}
       </div>
     </form>
   );
